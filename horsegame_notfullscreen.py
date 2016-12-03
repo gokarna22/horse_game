@@ -6,6 +6,7 @@
 
 # TODO
 # Assign winnings to players (new screen for winners?)
+# Write the Broke function to end the game (or end if 1 player left and have a winner?)
 # Add sound http://stackoverflow.com/questions/28795859/how-can-i-play-a-sound-when-a-tkinter-button-is-pushed-python-3-4
 # Slow down the race
 # Tidy up
@@ -28,8 +29,8 @@ tk.title("Horse Game")
 ####tk.attributes("-fullscreen", True)
 tk.update()
 
-screen_width = 640 #### tk.winfo_width()   # 1280
-screen_height = 360 ####tk.winfo_height()   # 720
+screen_width = 1280 #### tk.winfo_width()   # 1280
+screen_height = 720 ####tk.winfo_height()   # 720
 
 NumberofPunters = 0
 keypressed = False
@@ -74,7 +75,7 @@ class HorseSprite:
         self.bib = canvas.create_rectangle(self.pos-10, row-5, self.pos+10, row+5, fill=self.colour)
         
     def move(self):
-        # change the image
+        # change the image to make the horse gallop
         if self.current_image == 0:
             self.current_image = 1
         else:
@@ -252,6 +253,7 @@ def StartingPrices(canvas):
     canvas.pack()
     tk.update()
 
+    # ask punters one by one for their bets
     for punter in punterlist:
         if punter.total <= 0:
             canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you are BROKE. NO BETS!!!!", fill="dark red", font=myfont, justify="center")
@@ -300,7 +302,7 @@ def Race(canvas):
     tk.update()
     random.seed()
 
-    # mainloop
+    # main race loop
     while True:
         # pick a random horse
         h = random.randint(0,6)
@@ -311,39 +313,45 @@ def Race(canvas):
         # update the screen
         tk.update_idletasks()
         tk.update()
-        # check for the winner
+        # check for the winner, break from the race loop if we have one
         if horse.pos < finish_pos:
             break
         # wait for some time
         time.sleep(horse_wait)
 
+    # announce the winner
     winner_text = horse.name + " is the winner!"
     #canvas.create_text(250, (h+1)*row_spacing, text=winner_text)
     canvas.create_text(screen_width/2, screen_height-200, text=winner_text, fill="dark blue", font=myfont, justify="center")
     WaitForKeyPress(canvas)
 
+    # return the number of the winning horse so we can calculate punter winnings next
     return h
 
             
 # HORSE-RACE MAIN CODE
+
+# setup a callback on any keypress for keyboard entry
 tk.bind_all('<Key>', KeyPress)
 
+# setup a canvas to draw on
 canvas = Canvas(tk, width=screen_width, height=screen_height, highlightthickness=0)
 
+# setup horses and punters
 Initialize_characters_variables(canvas)
 Punters(canvas)
 
-# main loop
+# main game loop
 while True:
     Broke = DisplayCash(canvas, wait=True)
     print(str(Broke)+" punters are broke out of "+str(len(punterlist)))
-    if Broke == len(punterlist):
+    if Broke == len(punterlist):    # if everyone broke, end the game by breaking out of the game loop
         break
     StartingPrices(canvas)
     winning_horse = Race(canvas)
     print("Horse index ", winning_horse, " ", horselist[winning_horse].name, " is the winner.")
     #Results()
 
-# end game
+# end the game
 #Broke()
 
