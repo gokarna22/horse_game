@@ -1,0 +1,167 @@
+THIS IS THE LIKELY CODE FOR THE BBC B                            THIS IS WHAT WAS PULLED FROM THE BBC B TAPE
+10 REM HORSE-RACE                                                  Ù HORSE-RACE
+20 MODE 2                                                        	Î2   
+30 PROCInitialize_characters_variables                           (ÚInitialize_characters_variables    
+40 PROCPunters                                                   (ÚPunters
+50 PROCDisplaycash                                               2ÚDisplaycash
+60 IF Broke=Numberofpunters THEN PROCBroke:QUIT                   <'  Á Broke=Numberofpunters  ÚBroke:‡
+70 PROCStartingprices                                            FÚStartingprices
+80 PROCRace                                                      P	ÚRace
+90 PROCResults                                                   ZÚResults
+100 GOTO 50                                                      d	ÂçTr@
+110 REM ***********************************                      n'*******Æ***************************
+120 DEF PROCPunters                                              x›ÚPunters     
+130 VDU 19,0,1,0,0,0,19,1,0,0,0,0                                ?Ô19,0,1,0,0,0,19,1,0,0,0,0
+140 INPUT TAB(0,0)"How many PUNTERS",Numberofpunters             ?.Ë?0,0)"How many PUNTERS",Numberofpunters  
+150 IF Numberofpunters>10 THEN Numberofpunters<1 ? PRINT TAB(0,0);STRING$(25," "):GOTO 140       ?GÁ Numberofpunters>10 ? Numberofpunters<1 ? Ò?0,0);ƒ25," "):ÂçtL@   
+160 DIM Punter$(Numberofpunters)                                †ﬁPunter$(Numberofpunters)-
+170 DIM Punterstotal(Numberofpunters)                            ™"ﬁPunterstotal(Numberofpunters)
+180 DIM Puntersstake(Numberofpunters)                            ¥#ﬁPuntersstake(Numberofpunters) 
+190 DIM Punterspick(Numberofpunters)                             æ#ﬁPunterspick(Numberofpunters)  
+210 FOR X= 1 TO Numberofpunters                                  »„X= 1 ∏ Numberofpunters
+220   IF X>7 THEN COLOUR RND(7) ELSE COLOUR X:INPUT TAB(0,X*2)"Enter NAME",Punter$(X)             Á X>7 ˚≥(7)  ? ˚X   ‹#Ë?0,X*2)"Enter NAME",Punter$(X)
+230   IF LEN(Punter$(X))>5 OR LEN(Punter$(X))<1 PRINT TAB(0,X*2);STRING$(25," "):GOTO 220          ÊCÁ ©(Punter$(X()>5!? ©(Punter$(X))<1 ? Ò?0,X*2);ƒ25," "):Âçd\@  
+240 NEXT X                                                       ÌX  
+250 COLOUR 4:PRINT ''"ALL PUNTERS START       WITH £100"         ˙0˚4:Ò''"ALL PUNTERS START       WITH `100"   
+260 FOR X=1 TO Numberofpunters:Punterstotal(X)=100:NEXT X        3„X=1∏ Numberofpunters:Punterstotal(X)=100:Ì           
+270 PRINT ''';TAB(4);"Press SPACE":REPEAT:A$=GET:UNTIL A$=" "    2˚14:Ò''';?(4);"Press SPACE":ı:A$=æ:˝ A$=" "   
+280 VDU 19,0,0,0,0,0,19,1,1,0,0,0                                "Ô19,0,0,0,0,0,19,1,1,0,0,0    
+290 ENDPROC                                                      " ·
+300 REM **********************************                       ,&**********************************
+310 DEF PROCDisplaycash                                          6›ÚDisplaycash
+320 CLS                                                          @€
+330 Broke=0                                                      JBroke=0
+340 VDU 19,0,5,0,0,0,19,5,0,0,0,0                                TÔ19,0,5,0,0,0,19,5,0,0,0,0
+350 IF Numberofpunters>1 PROCSORT                                ^Á Numberofpunters>1 ÚSORT
+360 Y=0:REPEAT:Y=Y+1                                             hY=0:ı:Y=Y+1
+370   IF Punterstotal(Y)=0 THEN Broke=Broke+1                    r( Á Punterstotal(Y)=0 ? Broke=Broke+1
+380   COLOUR Y:IF Y>7 COLOUR RND(7)                              |˚Y:Á Y>7 ˚≥(7)
+390   PRINT TAB(0,Y*3);Y;") ";Punter$(Y);" has £";Punterstotal(Y)?8Ò?0,Y*3);Y;") ";Punter$(Y);" has `";Punterstotal(Y) 
+400 UNTIL Y = Numberofpunters                                    ê˝ Y = Numberofpunters
+410 COLOUR 14:PRINT "Press SPACE":REPEAT:A$=GET:UNTIL A$=" "     ?.˚14:Ò'"    Press SPACE":ı:A$=æ:˝ A$=" "   
+420 VDU 19,0,0,0,0,0,19,5,5,0,0,0                                §#Ô19,0,0,0,0,0,19,5,5,0,0,0     
+430 ENDPROC                                                      Æ·
+440 REM ***********************************                      ∏'***********************************
+450 DEF PROCStartingprice                                        ¬›ÚStartingprice
+460 CLS                                                          ≥?ÅÊ?ê
+470 VDU 19,0,2,0,0,0,19,2,0,0,0,0                                ª(»ÁÙ19,0,2,0,0,0,19,2,0,0,0,0
+480 COLOUR 13:PRINT TAB(0,0)STRING$(20,"-")                      ‡˚13:Ò?0,0)ƒ20,"-")
+490 COLOUR 9:PRINT TAB(0,1)"* STARTING PRICES *"                 Í"˚9:Ò?0,1)"* STARTING PRICES *"
+500 COLOUR 13:PRINT TAB(0,2)STRING$(20,"-")                      Ù˚13:Ò?0,2)ƒ20,"-") 
+510 X=0:REPEAT:X=X+1:PRICE(X)=RND(5)*5                           ˛ X=0:ı:X=X+1:PRICE(X)=≥(5)*5 
+520   COLOUR X                                                   ˚X     
+530   PRINT TAB(0,X*2+2);X;" ";Horse$(X);" ";PRICE(X);"~1"       2Ò?0,X*2+2);X;" ";Horse$(X);" ";PRICE(X);"~1"  
+540 UNTIL X=7                                                     ˝ X=7
+550 COLOUR 1:PRINT TAB(0,21)STRING$(20,"=")                           &˚1:Ò?0,21)ƒ20,"R=")
+560 COLOUR 10:PRINT TAB(3,22)"PLACE YOUR BETS"                         0$˚10:Ò?3,22)"PLACE YOUR BETS"    
+570 COLOUR 1:PRINT TAB(0,23)STRING$(20,"=")                           :˚1:Ò?0,23)ƒ20,"=") 
+580 X=0:REPEAT:X=X+1                                             DX=0:ı:X=X+1
+590   IF Punterstotal(X)=0 THEN COLOUR 12:PRINT TAB(0,24);Punter$(X);"  You are BROKE":COLOUR 5:PRINT TAB(0,26);" NO BETS!!!!":PROCtune(5,2):T=???(200):Puntersstake(X)=0:Punterspick(X)=8:GOTO 660                                N?ÁPunterstotal(X)=0 ˚12:Ò?0,24);Punter$(X);" You are BROKE":˚5:Ò?0,26);" NO BETS!!!!":Útune(5,2):T=¶(200):Puntersstake(X)=0:Punterspick(X)=8:Âçt^B  
+600   COLOUR 5:PRINT TAB(0,24);Punter$(X);" You have £";Punterstotal(X):INPUT TAB(0,26)" Pick a Horse 1-7",Punterspick(X)              Xc˚5:Ò?0,24);Punter$(X);"You have `";Punterstotal(X):Ë?0,26)" Pick a Horse 1-7",Punterspick(X)  
+610   IF Punterspick(X)>7 OR Punterspick(X)<1 THEN PRINT TAB(0,26);STRING$(20," "):PRINT TAB(0,27);STRING$(20," "):GOTO 600           bUÁPunterspick(X)>7 ? Punterspick(X)<1 ? Ò?0,26);ƒ20," "):Ò?0,27);ƒ20," "):ÂçDXB   
+620 COLOUR 6:INPUT TAB(2,28)"How much",Puntersstake(X)                l,˚6:Ë?3,28)"How much",Puntersstake(X)    
+630   IF INT(Puntersstake(X))<>Puntersstake(X) OR Puntersstake(X)<1 THEN PRINT TAB(0,28);STRING$(20," "):PRINT TAB(0,29);STRING$(20," "):GOTO 600       vhÁ ®(Puntersstake(X))<>Puntersstake(X) ? Puntersstake~?N?(X)<1:Ò?0,28);ƒ20," "):Ò?0,29);ƒ20," "):ÂçDlB   
+640   IF Puntersstake(X)>Puntertotal(X):COLOUR 8:PRINT TAB(2,29)"SORRY NO CREDIT!":SOUND 1,-15,100,10:FOR T=1 TO 4000:NEXT T:PRINT TAB (0,28);STRING$(20," "):PRINT TAB (0,29);STRING$(20," "):GOTO 600                                   ?? Á Puntersstake(X)>Punterstotal(X):˚8:Ò?2,29)"SORRY NO CREDIT!":‘1,-15,100,10:„T=1∏4000:Ì:Ò?0,28);ƒ20," "):Ò?0,29);ƒ20," "):ÂçDlB  
+650   Punterstotal(X)=Punterstotal(X)-Puntersstake(X)              ?3Punterstotal(X)=Punterstotal(X)-Puntersstake(X)
+660   C=24                                                         ?C=24
+670   PRINT TAB(0,C) STRING$(20," "):C=C+1:IF C>29 THEN GOTO ??? ELSE GOTO 660    ?/Ò?0,C)ƒ20,DÔÔÔ" "):C=C+1:Á C>29 ? ÂçthB ? Âçt^B
+680 UNTIL X=Numberofpunters                                        ®˝ X=Numberofpunters
+690 VDU 19,0,0,0,0,0,19,2,2,0,0,0                                  ≤!Ô19,0,0,0,0,0,19,2,2,0,0,0   
+700 ENDPROC                                                        º·
+710 REM ***********************************                        ∆'***********************************
+720 DEF PROCRace                                                   –›ÚRace
+730 CLS                                                            ⁄€
+740 VDU 19,0,2,0,0,0,19,2,0,0,0,0                                  ‰Ô19,0,2,0,0,0,19,2,0,0,0,0
+750 COLOUR 133:FOR X=20 TO 30:PRINT TAB(0,X);STRING$(20," "):NEXT X              Ó&˚133:„X=20 ∏ 30:Ò?0,X);ƒ20," "):Ì 
+760 COLOUR 7:PRINT TAB(0,1);STRING$(28,"-")                                     ¯˚7:Ò?0,1();ƒ28,"-")  
+770 COLOUR 4                                                            ˚4
+779 REM Ò?0,1?)ˇÔˇo‰9)"Punter Horse  odds~1"
+780 PRINT TAB(0,1)"Punter Horse  odds~1"                        #Ò?0,1?)ˇÔˇo‰9)"Punter Horse  odds~1"  
+790 COLOUR 7                                                       ˚7
+800 PRINT TAB(0,20);STRING$(20,"-")                                 Ò?0,20);ƒ20,"-")    
+810 X=0:REPEAT:X=X+1                                               *X=0:ı:X=X+1
+820   COLOUR 3                                                       4˚3
+830   IF Punterspick(X)=8 THEN PRICE(Punterspick(X))=0               >-ÁPunterspick(X)=8 PRICE(Punterspick(X))=0
+840   PRINT TAB(0,20+X);Punter$(X):COLOUR 4:PRINT TAB(6,20+X);Punterpick(X):COLOUR 1:PRINT TAB(7,20+X);Horse$(Punterspick(X)):COLOUR 3:PRINT TAB(18,20+X);PRICE(Punterpick(X))      H?Ò?0,20+X);Punter$(X):˚4:Ò?6,20+X);Punterspick(X):˚1:Ò?7,20+X);Horse$(Punterspick(X)):˚3:Ò?18,20+X);PRICE(Punterspick(X))    
+850 UNTIL X=Numberofpunters                                        R˝ i?ˇÔÔX=Numberofpunters
+860 COLOUR 128                                                            \˚128   
+870 FOR X=1 TO 7:startpos(X)=11+(PRICE(X)/5):NEXT X                f*„X=1∏7:startpos(X)=11+(PRICE(X)/5):Ì  
+880 FOR X=2 TO 14 STEP 2:COLOUR X/2:PRINT TAB(0,X+1);CHR$230;startpos(X/2));LEGSOUT$;X/2:NEXT X            pD„ X=2∏14 ? 2:˚X/2:Ò?0,X+1);Ω230;?startpos(X/2));LEGSOUT$;X/2:Ì  
+890 PRINT TAB(0,1);CHR$229;STRING$(19,"_");PRINT TAB(0,16);CHR$229;STRING$(19,"_")        z1Ò?0,1);Ω229;ƒ19,"_"):Ò?0,16);Ω229;ƒ19,"_")   
+900 SOUND 0,1,4,2:T=???(50)                                           ?‘0,1,4,2:T=¶(50)
+910 REPEAT:HORSE=RND(7)                                            ?ı:HORSE=≥(7)
+920   COLOUR HORSE                                                   ?˚HORSE
+930   PRINT TAB(startpos(HORSE),HORSE*2+1);LEGSIN$                   ¢+Ò?startpos(HORSE),HORSE*2+1);LEGSIN$   
+940   FOR T=1 to 500:NEXT T                                         ¨„T=1∏500:Ì     
+950   SOUND 1,-15,4,RND(1.5):SOUND 0,1,4,.5:SOUND 0,0,0,2:SOUND 2,1,3,.5    ∂4‘1,-15,4,≥(1.5):‘0,1,4,.5:‘0,0,0,2:‘2,1,3,.5    
+960   SOUND 1,-15,1,RND(1.5):SOUND 0,2,4,1:SOUND 0,0,0,2:SOUND 0,2,3,1      ¿.‘1,-15,1,≥(1.5):‘0,2,4,1:‘0,0,0,2:‘0,2,3,1
+970   PRINT TAB(startpos(HORSE),HORSE*2+1);LEGSOUT$                  -Ò?startpos(HORSE),HORSE*2+1);LEGSOUT$    
+980   startpos(HORSE)=startpos(HORSE)-1                             ‘%startpos(HORSE)=startpos(HORSE)-1
+990 UNTIL startpos(HORSE)<0                                         ﬁ˝startpos(HORSE)<0
+1000 ENDPROC                                                         Ë·
+1010 REM ***********************************                        Ú'***********************************
+1020 DEF PROCResults                                                ¸›ÚResults
+1030 FOR X=18 TO 29:PRINT TAB(0,X);STRING$(20," "):NEXT X                „X=18∏29:Ò?0,X);ƒ20," "):Ì  
+1040 COLOUR 12:PRINT TAB(0,18)"WINNER IS NUMBER ";HORSE;'';Horse$(HORSE);" at "PRICE(HORSE);"~1"         R˚12:Ò?0,18)"WINNER IS NUMBER ";HORSE;'';Horse$(HORSE);" at "PRICE(HORSE);"~1" 
+1050 X=0:REPEAT:X=X+1                                             X=0:ı:X=X+1
+1060   IF Punterspick(X)=HORSE PRINT '';Punter$(X);" wins £";Puntersstake(X)*PRICE(HORSE)+Puntersstake(X):Punterstotal(X)=Punterstotal(X)+Puntersstake(X)*PRICE(HORSE)+Puntersstake(X) $ØÁPunterspick(X)=HORSE Ò'';Punter$(X);" wins `";Puntersstake(X)*PRICE(HORSE)+Puntersstake(X):Punterstotal(X)=Punterstotal(X)+Puntersstake(X)*PRICE(HORSE)+Puntersstake(X)   
+1070 UNTIL X=Numberofpunters                                        .˝ X=Numberofpunters 
+1080 PROCtune(33,1)                                                 8Útune(33,1)
+1090 COLOUR 2:PRINT "Press SPACE":REPEAT:A$=GET:UNTIL A$=" "                 B0˚2:Ò''"    Press SPACE":ı:A$=æ:˝ A$=" "     
+1100 VDU 19,0,0,0,0,0,19,2,2,0,0,0                                  L!Ô19,0,0,0,0,0,19,2,2,0,0,0   
+1110 ENDPROC                                                         V·
+1120 REM **********************************                          `&**********************************
+1130 DEF PROCSORT                                                    j?6(›ÚSORT
+1140 FOR S=1 TO Numberofpunters                                      t„S=1 ∏ Numberofpunters
+1150   M=0                                                          ~M=0
+1160   I=0:REPEAT:I=I+1                                             ?I=0:ı:I=I+1
+1170     IF Punterstotal(I)>=Punterstotal(I+1) THEN GOTO 1220         ?/ ÁPunterstotal(I)>=Punterstotal(I+1) ? çdDD
+1180     X=Punterstotal(I):Y$=Punter$(I)                              ?#X=Punterstotal(I):Y$=Punter$(I)
+1190     Punterstotal(I)=Punterstotal(I+1):Punter$(I)=Punter$(I+1)        ¶=Punterstotal(I)=Punterstotal(I+1):Punter$(I)=Punter$(I+1)
+1200     Punterstotal(I+1)=X:Punter$(I+1)=Y$                               ∞'Punterstotal(I+1)=X:Punter$(I+1)=Y$
+1210     M=1                                                                ∫ M=1
+1220   UNTIL I=Numberofpunters-1                                                ƒ˝ I=Num?berofpqnters-1   
+1230   IF M=0 THEN ENDPROC                                                  Œ ÁM=0 ? ·
+1240 NEXT S:ENDPROC                                                         ÿ	 ÌS:·
+1250 REM ***********************************                                 ‚'***********************************
+1260 DEF PROCInitialize_characters_variables                                 Ï&› ÚInitialize_characters_variables
+1270 *FX11,0                                                                 ˆ*FX11,0 
+1280 VDU 23;8202;0;0;0;                                                      Ô23;8202;0;0;0;
+1290 DIM startpos(7):DIM Horse$(8):DIM PRICE(8)                              %ﬁstartpos(7):ﬁHorse$(8):ﬁPRICE(8)
+1300 VDU 23,225,16,56,48,79,31,40,80,32                                      $Ô23,225,16,56,48,79,31,40,80,32 
+1310 VDU 23,226,0,0,64,128,192,160,80,32                                     $Ô23,226,0,0,64,128,192,160,80,32
+1320 VDU 23,227,16,56,48,79,31,25,20,13                                      (#Ô23,227,16,56,48,79,31,25,20,13
+1330 VDU 23,228,0,0,64,128,192,64,128,0                                      2#Ô23,228,0,0,64,128,192,64,128,0
+1340 VDU 23,229,56,68,68,68,56,16,16,16                                      <#Ô23,229,56,68,68,68,56,16,16,16
+1350 VDU 23,230,16,16,16,16,16,16,16,16                                      F#Ô23,230,16,16,16,16,16,16,16,16
+1360 VDU 23,255,0,0,0,0,0,0,0,0                                              PÔ23,255,0,0,0,0,0,0,0,0
+1370 LEGSOUT$=CHR$225+CHR$226+CHR$255                                        ZLEGSOUT$=Ω225+Ω226+Ω255 
+1380 LEGSIN$=CHR$227+CHR$228+CHR$255                                         dLEGSIN$=Ω227+Ω228+Ω255 
+1390 Horse$(1)="Redwold":Horse$(2)="Black Jet":Horse$(3)="Yellow Dog":Horse$(4)="Super Blue":Horse$(5)="Hot Magenta":Horse$(6)="Cyan Runner":Horse$(7)="White Flash":Horse$(8)=CHR$8+CHR$8+"   NO BET"                  n¿Horse$(1)="Redwold":Horse$(2)="Black Jet":Horse$(3)="Yellow Dog":Horse$(4)="Super Blue":Horse$(5)="Hot Magenta":Horse$(6)="Cyan Runner":Horse$(7)="White Flash":Horse$(8)=Ω8+Ω8+"   NO BET" 
+1400 ENDPROC                                                                 x·
+1410 REM **********************************                                   ?&**********************************
+1420 DEF PROCtune(len,dur)                                                    ?›Útune(len,dur)
+1430 LOCAL X%                                                                   ?ÍX%
+1440 ENVELOPE 1,1,0,0,0,0,0,0,126,-4,0,-63,126,100                                 †.‚1,1,0,0,0,0,0,0,126,-4,0,-63,126,100     
+1450 ENVELOPE 2,1,0,0,0,0,0,0,63,10,0,-63,63,110                                   ™'‚2,1,0,0,0,0,0,0,63,10,0,-63,63,110
+1460 FOR X%=1 TO len                                                          ¥„ X%=1∏len    
+1470   READ note,duration                                                        æÛ note,duration
+1480   duration=duration*dur                                                    »duration=duration*dur
+1490   IF note=0 THEN vol=0 ELSE vol=2                                      “Á note=0 vol=0 ? vol=2 
+1500   SOUND &0201,vol,note,duration:SOUND &0202,vol,note,duration:SOUND &0203,vol,note,duration    ‹P‘&0201,vol,note,duration:‘&0202,vol,note,duration:‘&0203,vol,note,duration  
+1510 NEXT X%                                                                    ÊÌX%
+1520 RESTORE                                                                      ˜
+1530 ENDPROC                                                                      ˙·
+1540 DATA 149,5,149,5,149,5,137,2.5,137,2.5,149,2.5,149,2.5,157,5,149,5,137,5,0,5,137,5,129,15,137,5,129,10      i‹ 149,5,149,5,149,5,137,2.5,137,2.5,149,2.5,149,2.5,157,5,149,5,137,5,0,5,137,5,129,15,137,5,129,10  
+1550 DATA 149,5,149,5,149,5,137,5,149,2.5,149,2.5,157,5,149,2.5,149,2.5,137,5,0,5,137,2.5,129,2.5,121,2.5,129,2.5,137,5,129,5,121,10     ?‹ 149,5,149,5,149,5,137,5,149,2.5,149,2.5,157,5,149,2.5,149,2.5,137,5,0,5,137,2.5,129,2.5,121,2.5,129,2.5,137,5,129,5,121,10  
+1560 DEF PROCBroke                                                           › ÚBroke
+1570 CLS                                                                     "€
+1580 PRINT TAB(0,6)"All punters are"                                         ,Ò?0,6)"All punters are"
+1590 PRINT TAB(0,8)"       BROKE!!!"                                         6Ò?0,8)"       BROKE!!!"
+1600 PRINT TAB(0,12)"The meeting ends"                                       @ Ò?0,12)"The meeting ends"   
+1610 PROCtune(33,2)                                                          JÚtune(33,2)  
+1620 PRINT ''''"Another race y/n?":A$=GET:IF A$="Y" OR A$="y" THEN RUN       T9Ò''''"Another race y/n?":A$=æ:Á A$="Y" ? A$="y"  ˘   
+1630 *FX11,15                                                                ^*FX11,15
+1640 ENDPROC                                                                 h·
+
+ˇ±)«FHÊ:A !˛~¿ÒÔ/E}yˇv>|∫¯øË@„!?q‡√
