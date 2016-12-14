@@ -14,13 +14,14 @@
 
 from tkinter import *
 #from winsound import *
+from pygame import mixer as sound
 import random
 import time
 import tkinter.messagebox
 import tkinter.simpledialog
 
 tk = Tk()
-
+sound.init()
 
 # make the window and canvas to draw on
 tk.title("Horse Game")
@@ -86,6 +87,7 @@ class HorseSprite:
         self.canvas.move(self.bib, -horse_step, 0)
         self.pos -= horse_step
         ####PlaySound('hooves.wav', SND_FILENAME)
+        sound.music.play()
 
 
 # make a punter (player) class, there will be a few of those
@@ -304,6 +306,7 @@ def Race(canvas):
     canvas.pack()
     tk.update()
     random.seed()
+    sound.music.load("hooves.mp3")
 
     # main race loop
     while True:
