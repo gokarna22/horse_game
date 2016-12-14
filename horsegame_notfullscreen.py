@@ -13,7 +13,7 @@
 
 
 from tkinter import *
-####from winsound import *
+#from winsound import *
 import random
 import time
 import tkinter.messagebox
@@ -29,8 +29,8 @@ tk.title("Horse Game")
 ####tk.attributes("-fullscreen", True)
 tk.update()
 
-screen_width = 1280 #### tk.winfo_width()   # 1280
-screen_height = 720 ####tk.winfo_height()   # 720
+screen_width = 640 #### tk.winfo_width()   # 1280
+screen_height = 360 ####tk.winfo_height()   # 720
 
 NumberofPunters = 0
 keypressed = False
@@ -270,7 +270,10 @@ def StartingPrices(canvas):
                 answer = canvas.create_text(screen_width/2, pos+row_spacing*6, text="", fill="orange", font=myfont, justify="center")
                 punter.stake = WaitForInteger(canvas, answer)
                 if punter.stake > punter.total:
-                    canvas.create_text(screen_width/2, pos+row_spacing*7, text="SORRY NO CREDIT!", fill="dark blue", font=myfont, justify="center")
+                    sorry = canvas.create_text(screen_width/2, pos+row_spacing*8, text="SORRY NO CREDIT!", fill="dark blue", font=myfont, justify="center")
+                    tk.update()
+                    time.sleep(3)
+                    canvas.delete(sorry)
                 canvas.delete(question, answer)
             punter.total = punter.total - punter.stake
             print (punter.name + " placed £" + str(punter.stake) + " on " + horselist[punter.pick].name + " and now has £" + str(punter.total))
@@ -328,7 +331,30 @@ def Race(canvas):
     # return the number of the winning horse so we can calculate punter winnings next
     return h
 
-            
+def Results(canvas, winning_horse_index):
+    # clear the scene
+    canvas.delete("all")
+    # draw the scene
+    canvas.create_rectangle(0, 0, screen_width, screen_height, fill="green")
+    canvas.create_text(screen_width/2, row_spacing,  text="--------------------------------", fill="red", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*2, text="* RESULTS *", fill="dark red", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="red", font=myfont, justify="center")
+    pos = row_spacing*5
+    i = 1
+    winning_horse = horselist[winning_horse_index]
+    for punter in punterlist:
+        #print("Horse index " + str(winning_horse_index) + " punter pick " + str(punter.pick))
+        if punter.pick == winning_horse_index:
+            winnings = punter.stake * winning_horse.price
+            punter.total = punter.total + winnings + punter.stake
+            message = punter.name + " wins £" + str(winnings) + " on " + winning_horse.name
+            canvas.create_text(screen_width/2, pos, text=message, fill=winning_horse.colour, font=myfont, justify="center")
+            pos = pos + row_spacing*2
+            i = i + 1
+
+    WaitForKeyPress(canvas)
+
+
 # HORSE-RACE MAIN CODE
 
 # setup a callback on any keypress for keyboard entry
@@ -350,7 +376,7 @@ while True:
     StartingPrices(canvas)
     winning_horse = Race(canvas)
     print("Horse index ", winning_horse, " ", horselist[winning_horse].name, " is the winner.")
-    #Results()
+    Results(canvas, winning_horse)
 
 # end the game
 #Broke()
