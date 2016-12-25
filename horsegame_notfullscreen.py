@@ -14,14 +14,14 @@
 
 from tkinter import *
 #from winsound import *
-from pygame import mixer as sound
+from pygame import mixer as sounds
 import random
 import time
 import tkinter.messagebox
 import tkinter.simpledialog
 
 tk = Tk()
-sound.init()
+sounds.init()
 
 # make the window and canvas to draw on
 tk.title("Horse Game")
@@ -49,6 +49,10 @@ myfont = ("Fixedsys", str(int(row_spacing)))    #("Arial", "32")
 # make empty lists
 horselist = []
 punterlist = []
+
+# sounds
+hoovesSound = sounds.Sound("hooves.wav")
+brokeSound = sounds.Sound("broke.wav")
     
 # make a horse class so it is easy to make many of them
 class HorseSprite:
@@ -87,7 +91,8 @@ class HorseSprite:
         self.canvas.move(self.bib, -horse_step, 0)
         self.pos -= horse_step
         ####PlaySound('hooves.wav', SND_FILENAME)
-        sound.music.play()
+        #sounds.music.play()
+        hoovesSound.play()
 
 
 # make a punter (player) class, there will be a few of those
@@ -258,7 +263,11 @@ def StartingPrices(canvas):
     # ask punters one by one for their bets
     for punter in punterlist:
         if punter.total <= 0:
-            canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you are BROKE. NO BETS!!!!", fill="dark red", font=myfont, justify="center")
+            sorry = canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you are BROKE. NO BETS!!!!", fill="dark red", font=myfont, justify="center")
+            tk.update()
+            brokeSound.play()
+            time.sleep(3)
+            canvas.delete(sorry)
         else:
             punter.pick=-1
             punter.stake=-1
@@ -306,7 +315,6 @@ def Race(canvas):
     canvas.pack()
     tk.update()
     random.seed()
-    sound.music.load("hooves.mp3")
 
     # main race loop
     while True:
@@ -355,7 +363,10 @@ def Results(canvas, winning_horse_index):
             pos = pos + row_spacing*2
             i = i + 1
 
+    sounds.music.load("yankee.mp3")
+    sounds.music.play()
     WaitForKeyPress(canvas)
+    sounds.music.fadeout(10)
 
 
 # HORSE-RACE MAIN CODE
