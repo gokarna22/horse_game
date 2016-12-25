@@ -26,21 +26,24 @@ tk.title("Horse Game")
 #tk.resizable(False, False)
 #tk.attributes("-topmost", True)
 tk.attributes("-fullscreen", True)
+tk.config(cursor='none')
 tk.update()
 
 screen_width = tk.winfo_width()   # 1280
-screen_height = tk.winfo_height()   # 720
+#screen_height = tk.winfo_height()   # 720
+screen_height = int(screen_width * 9 / 16)   # Make the screen the right shape for widescreen TV
+print ("Screen: " + str(screen_width) + " by " + str(screen_height))
 
 NumberofPunters = 0
 keypressed = False
 numberofLines = 32
-numberofCols = 20
+numberofCols = 10  #40
 
 row_spacing = screen_height/numberofLines  #55  #75
-start_pos = screen_width - 200  # 1000
+#start_pos = screen_width - 200  # 1000
 finish_pos = 200
 horse_step = (screen_width - 400)/numberofCols    #50
-horse_wait = 0.2
+horse_wait = 0.4
 
 myfont = ("Fixedsys", str(int(row_spacing)))    #("Arial", "32")
 
@@ -49,6 +52,7 @@ horselist = []
 punterlist = []
 
 # sounds
+gunSound = sounds.Sound("gun.wav")
 hoovesSound = sounds.Sound("hooves.wav")
 brokeSound = sounds.Sound("broke.wav")
     
@@ -65,12 +69,12 @@ class HorseSprite:
         self.number = number
         self.name = name
         self.colour = colour
-        self.pos = start_pos
+        self.pos = 0 #start_pos
         self.current_image = 0
         self.price = 0
 
     def prepare_to_race(self):
-        self.pos = finish_pos + (11 + self.price/5)*horse_step   #start_pos
+        self.pos = finish_pos + (numberofCols - 6 + self.price/5)*horse_step   #start_pos
         self.current_image = 0
         row = self.number*row_spacing*2
         #canvas.create_rectangle(0, row-30, screen_width, row+30, fill='dark green')
@@ -88,10 +92,7 @@ class HorseSprite:
         self.canvas.move(self.image, -horse_step, 0)
         self.canvas.move(self.bib, -horse_step, 0)
         self.pos -= horse_step
-        ####PlaySound('hooves.wav', SND_FILENAME)
-        #sounds.music.play()
         hoovesSound.play()
-
 
 # make a punter (player) class, there will be a few of those
 class Punter:
@@ -212,7 +213,7 @@ def DisplayCash(canvas, wait=False):
     tk.update()
     if (wait):
         WaitForKeyPress(canvas)
-        
+    return Broke
 
 def Punters(canvas):
     DisplayCash(canvas)
@@ -289,6 +290,7 @@ def StartingPrices(canvas):
         
  
 def Race(canvas):
+    global keypressed, keyevent
     # clear the scene
     canvas.delete("all")
     # draw the scene
@@ -300,12 +302,12 @@ def Race(canvas):
     canvas.create_oval(finish_pos-horse_step-8, 7*2*row_spacing+30, finish_pos-horse_step+8, 7*2*row_spacing+30+16, width=5, fill="", outline="gold")
     canvas.create_line(finish_pos-horse_step, 7*2*row_spacing+30+16, finish_pos-horse_step, 7*2*row_spacing+65, width=5, fill="gold")
 
-    canvas.create_rectangle(200, 8*2*row_spacing+65, screen_width-200, screen_height-row_spacing, fill="green")
+    canvas.create_rectangle(200, 8*2*row_spacing+65, screen_width-200, screen_height-100, fill="green")
     pos = row_spacing*20
     for punter in punterlist:
         canvas.create_text(screen_width/2, pos, text=punter.name +" bet £"+ str(punter.stake) +" on "+ horselist[punter.pick].name +" at "+ str(horselist[punter.pick].price) +"/1",
                            fill=horselist[punter.pick].colour, font=myfont, justify="center")
-        pos = pos + row_spacing
+        pos = pos + row_spacing * 1.5
 
     for h in horselist:
         h.prepare_to_race()
@@ -313,6 +315,11 @@ def Race(canvas):
     canvas.pack()
     tk.update()
     random.seed()
+
+    WaitForKeyPress(canvas)
+    gunSound.play()
+    time.sleep(0.5)
+    keypressed = False
 
     # main race loop
     while True:
@@ -328,6 +335,10 @@ def Race(canvas):
         # check for the winner, break from the race loop if we have one
         if horse.pos < finish_pos:
             break
+        # Check for Esc
+        if keypressed == True:
+            if (keyevent.keysym == 'Escape'):
+                exit(0)            
         # wait for some time
         time.sleep(horse_wait)
 
@@ -364,8 +375,20 @@ def Results(canvas, winning_horse_index):
     sounds.music.load("yankee.mp3")
     sounds.music.play()
     WaitForKeyPress(canvas)
-    sounds.music.fadeout(10)
+    sounds.music.fadeout(2000)
 
+def Broke(canvas):
+    # clear the scene
+    canvas.delete("all")
+    # draw the scene
+    canvas.create_rectangle(0, 0, screen_width, screen_height, fill="black")
+    canvas.create_text(screen_width/2, row_spacing,  text="--------------------------------", fill="cyan", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*2, text="* GAME OVER *", fill="magenta", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="cyan", font=myfont, justify="center")
+    sounds.music.load("yankee_slow.mp3")
+    sounds.music.play()
+    WaitForKeyPress(canvas)
+    
 
 # HORSE-RACE MAIN CODE
 
@@ -381,9 +404,9 @@ Punters(canvas)
 
 # main game loop
 while True:
-    Broke = DisplayCash(canvas, wait=True)
-    print(str(Broke)+" punters are broke out of "+str(len(punterlist)))
-    if Broke == len(punterlist):    # if everyone broke, end the game by breaking out of the game loop
+    numberbroke = DisplayCash(canvas, wait=True)
+    print(str(numberbroke)+" punters are broke out of "+str(len(punterlist)))
+    if numberbroke == len(punterlist):    # if everyone broke, end the game by breaking out of the game loop
         break
     StartingPrices(canvas)
     winning_horse = Race(canvas)
@@ -391,5 +414,5 @@ while True:
     Results(canvas, winning_horse)
 
 # end the game
-#Broke()
+Broke(canvas)
 
