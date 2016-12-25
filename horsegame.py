@@ -5,21 +5,21 @@
 # Python3, can be run from IDLE, developed under version 3.5.1
 
 # TODO
-# Assign winnings to players (new screen for winners?)
-# Add sound http://stackoverflow.com/questions/28795859/how-can-i-play-a-sound-when-a-tkinter-button-is-pushed-python-3-4
+# Write the Broke function to end the game (or end if 1 player left and have a winner?)
 # Slow down the race
 # Tidy up
 
 
 from tkinter import *
-from winsound import *
+#from winsound import *
+from pygame import mixer as sounds
 import random
 import time
 import tkinter.messagebox
 import tkinter.simpledialog
 
 tk = Tk()
-
+sounds.init()
 
 # make the window and canvas to draw on
 tk.title("Horse Game")
@@ -47,6 +47,10 @@ myfont = ("Fixedsys", str(int(row_spacing)))    #("Arial", "32")
 # make empty lists
 horselist = []
 punterlist = []
+
+# sounds
+hoovesSound = sounds.Sound("hooves.wav")
+brokeSound = sounds.Sound("broke.wav")
     
 # make a horse class so it is easy to make many of them
 class HorseSprite:
@@ -74,7 +78,7 @@ class HorseSprite:
         self.bib = canvas.create_rectangle(self.pos-10, row-5, self.pos+10, row+5, fill=self.colour)
         
     def move(self):
-        # change the image
+        # change the image to make the horse gallop
         if self.current_image == 0:
             self.current_image = 1
         else:
@@ -84,7 +88,9 @@ class HorseSprite:
         self.canvas.move(self.image, -horse_step, 0)
         self.canvas.move(self.bib, -horse_step, 0)
         self.pos -= horse_step
-        PlaySound('hooves.wav', SND_FILENAME)
+        ####PlaySound('hooves.wav', SND_FILENAME)
+        #sounds.music.play()
+        hoovesSound.play()
 
 
 # make a punter (player) class, there will be a few of those
@@ -252,9 +258,14 @@ def StartingPrices(canvas):
     canvas.pack()
     tk.update()
 
+    # ask punters one by one for their bets
     for punter in punterlist:
         if punter.total <= 0:
-            canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you are BROKE. NO BETS!!!!", fill="dark red", font=myfont, justify="center")
+            sorry = canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you are BROKE. NO BETS!!!!", fill="dark red", font=myfont, justify="center")
+            tk.update()
+            brokeSound.play()
+            time.sleep(3)
+            canvas.delete(sorry)
         else:
             punter.pick=-1
             punter.stake=-1
@@ -268,7 +279,10 @@ def StartingPrices(canvas):
                 answer = canvas.create_text(screen_width/2, pos+row_spacing*6, text="", fill="orange", font=myfont, justify="center")
                 punter.stake = WaitForInteger(canvas, answer)
                 if punter.stake > punter.total:
-                    canvas.create_text(screen_width/2, pos+row_spacing*7, text="SORRY NO CREDIT!", fill="dark blue", font=myfont, justify="center")
+                    sorry = canvas.create_text(screen_width/2, pos+row_spacing*8, text="SORRY NO CREDIT!", fill="dark blue", font=myfont, justify="center")
+                    tk.update()
+                    time.sleep(3)
+                    canvas.delete(sorry)
                 canvas.delete(question, answer)
             punter.total = punter.total - punter.stake
             print (punter.name + " placed £" + str(punter.stake) + " on " + horselist[punter.pick].name + " and now has £" + str(punter.total))
@@ -300,7 +314,7 @@ def Race(canvas):
     tk.update()
     random.seed()
 
-    # mainloop
+    # main race loop
     while True:
         # pick a random horse
         h = random.randint(0,6)
@@ -311,39 +325,71 @@ def Race(canvas):
         # update the screen
         tk.update_idletasks()
         tk.update()
-        # check for the winner
+        # check for the winner, break from the race loop if we have one
         if horse.pos < finish_pos:
             break
         # wait for some time
         time.sleep(horse_wait)
 
+    # announce the winner
     winner_text = horse.name + " is the winner!"
     #canvas.create_text(250, (h+1)*row_spacing, text=winner_text)
     canvas.create_text(screen_width/2, screen_height-200, text=winner_text, fill="dark blue", font=myfont, justify="center")
     WaitForKeyPress(canvas)
 
+    # return the number of the winning horse so we can calculate punter winnings next
     return h
 
-            
+def Results(canvas, winning_horse_index):
+    # clear the scene
+    canvas.delete("all")
+    # draw the scene
+    canvas.create_rectangle(0, 0, screen_width, screen_height, fill="green")
+    canvas.create_text(screen_width/2, row_spacing,  text="--------------------------------", fill="red", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*2, text="* RESULTS *", fill="dark red", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="red", font=myfont, justify="center")
+    pos = row_spacing*5
+    i = 1
+    winning_horse = horselist[winning_horse_index]
+    for punter in punterlist:
+        #print("Horse index " + str(winning_horse_index) + " punter pick " + str(punter.pick))
+        if punter.pick == winning_horse_index:
+            winnings = punter.stake * winning_horse.price
+            punter.total = punter.total + winnings + punter.stake
+            message = punter.name + " wins £" + str(winnings) + " on " + winning_horse.name
+            canvas.create_text(screen_width/2, pos, text=message, fill=winning_horse.colour, font=myfont, justify="center")
+            pos = pos + row_spacing*2
+            i = i + 1
+
+    sounds.music.load("yankee.mp3")
+    sounds.music.play()
+    WaitForKeyPress(canvas)
+    sounds.music.fadeout(10)
+
+
 # HORSE-RACE MAIN CODE
+
+# setup a callback on any keypress for keyboard entry
 tk.bind_all('<Key>', KeyPress)
 
+# setup a canvas to draw on
 canvas = Canvas(tk, width=screen_width, height=screen_height, highlightthickness=0)
 
+# setup horses and punters
 Initialize_characters_variables(canvas)
 Punters(canvas)
 
-# main loop
+# main game loop
 while True:
     Broke = DisplayCash(canvas, wait=True)
     print(str(Broke)+" punters are broke out of "+str(len(punterlist)))
-    if Broke == len(punterlist):
+    if Broke == len(punterlist):    # if everyone broke, end the game by breaking out of the game loop
         break
     StartingPrices(canvas)
     winning_horse = Race(canvas)
     print("Horse index ", winning_horse, " ", horselist[winning_horse].name, " is the winner.")
-    #Results()
+    Results(canvas, winning_horse)
 
-# end game
+# end the game
 #Broke()
 
