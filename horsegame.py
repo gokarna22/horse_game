@@ -2,16 +2,11 @@
 # Based on an original game for the BBC model B, by John Barber of Ipswich Town
 # March 2016
 
-# Python3, can be run from IDLE, developed under version 3.5.1
+# Python3, can be run from IDLE or at the command line, developed under version 3.2 with pygame for sound
 
-# TODO
-# Write the Broke function to end the game (or end if 1 player left and have a winner?)
-# Slow down the race
-# Tidy up
-
+# Press Esc once or maybe more to exit the game early
 
 from tkinter import *
-#from winsound import *
 from pygame import mixer as sounds
 import random
 import time
@@ -31,13 +26,12 @@ tk.update()
 
 screen_width = tk.winfo_width()   # 1280
 screen_height = tk.winfo_height()   # 720
-#screen_height = int(screen_width * 9 / 16)   # Make the screen the right shape for widescreen TV
 print ("Screen: " + str(screen_width) + " by " + str(screen_height))
 
 NumberofPunters = 0
 keypressed = False
 numberofLines = 32
-numberofCols = 30
+numberofCols = 25 #30
 
 row_spacing = screen_height/numberofLines  #55  #75
 #start_pos = screen_width - 200  # 1000
@@ -77,7 +71,6 @@ class HorseSprite:
         self.pos = finish_pos + (numberofCols - 6 + self.price/5)*horse_step   #start_pos
         self.current_image = 0
         row = self.number*row_spacing*2
-        #canvas.create_rectangle(0, row-30, screen_width, row+30, fill='dark green')
         self.image = canvas.create_image(self.pos, row, image=self.images[0])
         self.bib = canvas.create_rectangle(self.pos-10, row-5, self.pos+10, row+5, fill=self.colour)
         
@@ -100,7 +93,9 @@ class Punter:
         self.name = name
         self.total = 100   # how much money they have left # random.randint(0,100) #
         self.pick = -1     # which horse they have picked, 0-6, -1=not made a pick
-        self.stake = 0     # how much they have bet on the horse
+        self.stake = 0     # how much they have bet on the horse+row_spacing
+        self.totalwinnings = 0 # running total of all winnings
+        self.numberofturns = 0 # count of how many turns this punter has
 
 # keypress callback, just update some global variables
 def KeyPress(event):
@@ -128,6 +123,7 @@ def WaitForInteger(canvas, textitem):
     global keypressed, keyevent
     string = ""
     keypressed = False
+    escape_press = 0
     while True:
         while (keypressed == False):
             # wait for KeyPress to be called
@@ -147,6 +143,8 @@ def WaitForInteger(canvas, textitem):
             #print (string)
             canvas.itemconfig(textitem, text=string)
         elif (keyevent.keysym == 'Escape'):
+            escape_press = escape_press + 1
+        if escape_press>1:
             exit(0)
         keypressed = False
     
@@ -155,6 +153,7 @@ def WaitForString(canvas, textitem):
     global keypressed, keyevent
     string = ""
     keypressed = False
+    escape_press = 0
     while True:
         while (keypressed == False):
             # wait for KeyPress to be called
@@ -168,12 +167,14 @@ def WaitForString(canvas, textitem):
                 string = string[:-1]
                 canvas.itemconfig(textitem, text=string)
         elif (keyevent.keysym == 'Escape'):
-            exit(0)
+            escape_press = escape_press + 1
         else:
             #print (keyevent.char)
             string = string + keyevent.char
             #print (string)
             canvas.itemconfig(textitem, text=string)
+        if escape_press>1:
+            exit(0)
         keypressed = False
 
 def Initialize_characters_variables(canvas):
@@ -227,7 +228,6 @@ def Punters(canvas):
     canvas.delete(question, answer)
 
     for i in range(1, n+1):
-        #name = tkinter.simpledialog.askstring("Punter " + str(i), "What is your name?")
         question = canvas.create_text(screen_width/2, screen_height-row_spacing*4, text="Punter " + str(i) + ", what is your name?", fill="red", font=myfont, justify="center")
         answer = canvas.create_text(screen_width/2, screen_height-row_spacing*2, text="", fill="orange", font=myfont, justify="center")
         name = WaitForString(canvas, answer)
@@ -269,23 +269,24 @@ def StartingPrices(canvas):
             time.sleep(3)
             canvas.delete(sorry)
         else:
+            punter.numberofturns = punter.numberofturns + 1
             punter.pick=-1
             punter.stake=-1
+            question1 = canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you have £" + str(punter.total) + ". Pick a horse 1-7", fill="white", font=myfont, justify="center")
             while (punter.pick<0 or punter.pick>6):
-                question = canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you have £" + str(punter.total) + ". Pick a horse 1-7", fill="white", font=myfont, justify="center")
-                answer = canvas.create_text(screen_width/2, pos+row_spacing*6, text="", fill="orange", font=myfont, justify="center")
-                punter.pick = WaitForInteger(canvas, answer) - 1
-                canvas.delete(question, answer)
+                answer1 = canvas.create_text(screen_width/2, pos+row_spacing*5.2, text="", fill="orange", font=myfont, justify="center")
+                punter.pick = WaitForInteger(canvas, answer1) - 1
+                canvas.delete(answer1)
+            question2 = canvas.create_text(screen_width/2, pos+row_spacing*7, text="How much on " + horselist[punter.pick].name + "?", fill="white", font=myfont, justify="center")
             while (punter.stake<0 or punter.stake>punter.total):
-                question = canvas.create_text(screen_width/2, pos+row_spacing*4, text="How much on " + horselist[punter.pick].name + "?", fill="white", font=myfont, justify="center")
-                answer = canvas.create_text(screen_width/2, pos+row_spacing*6, text="", fill="orange", font=myfont, justify="center")
-                punter.stake = WaitForInteger(canvas, answer)
+                answer2 = canvas.create_text(screen_width/2, pos+row_spacing*8.2, text="", fill="orange", font=myfont, justify="center")
+                punter.stake = WaitForInteger(canvas, answer2)
                 if punter.stake > punter.total:
-                    sorry = canvas.create_text(screen_width/2, pos+row_spacing*8, text="SORRY NO CREDIT!", fill="dark blue", font=myfont, justify="center")
+                    sorry = canvas.create_text(screen_width/2, pos+row_spacing*10, text="SORRY NO CREDIT!", fill="dark blue", font=myfont, justify="center")
                     tk.update()
-                    time.sleep(3)
+                    time.sleep(1)
                     canvas.delete(sorry)
-                canvas.delete(question, answer)
+                canvas.delete(answer2)
             punter.total = punter.total - punter.stake
             print (punter.name + " placed £" + str(punter.stake) + " on " + horselist[punter.pick].name + " and now has £" + str(punter.total))
         
@@ -326,6 +327,7 @@ def Race(canvas):
     gunSound.play()
     time.sleep(0.5)
     keypressed = False
+    esc_pressed = 0
 
     # main race loop
     while True:
@@ -344,15 +346,16 @@ def Race(canvas):
         # Check for Esc
         if keypressed == True:
             if (keyevent.keysym == 'Escape'):
+                esc_pressed = esc_pressed + 1
+                keypressed = False
+            if esc_pressed>1:
                 exit(0)            
         # wait for some time
         time.sleep(horse_wait)
 
     # announce the winner
     winner_text = horse.name + " is the winner!"
-    #canvas.create_text(screen_width/2, (h+1)*row_spacing, text=winner_text)
-    #canvas.create_text(screen_width/2, screen_height-200, text=winner_text, fill="dark blue", font=myfont, justify="center")
-    canvas.create_text(screen_width/2, 4*row_spacing, text=winner_text, fill="dark blue", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, (h+1)*row_spacing, text=winner_text, fill=horse.colour, font=myfont, justify="center")
     WaitForKeyPress(canvas)
 
     # return the number of the winning horse so we can calculate punter winnings next
@@ -367,22 +370,27 @@ def Results(canvas, winning_horse_index):
     canvas.create_text(screen_width/2, row_spacing*2, text="* RESULTS *", fill="yellow", font=myfont, justify="center")
     canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="red", font=myfont, justify="center")
     pos = row_spacing*5
-    i = 1
+    i = 0
     winning_horse = horselist[winning_horse_index]
     for punter in punterlist:
         #print("Horse index " + str(winning_horse_index) + " punter pick " + str(punter.pick))
         if punter.pick == winning_horse_index:
             winnings = punter.stake * winning_horse.price
             punter.total = punter.total + winnings + punter.stake
+            punter.totalwinnings = punter.totalwinnings + winnings
             message = punter.name + " wins £" + str(winnings) + " on " + winning_horse.name
             canvas.create_text(screen_width/2, pos, text=message, fill=winning_horse.colour, font=myfont, justify="center")
             pos = pos + row_spacing*2
             i = i + 1
 
+    if i==0:
+        canvas.create_text(screen_width/2, pos, text="No winners this race...", fill=winning_horse.colour, font=myfont, justify="center")
+
+
     sounds.music.load("yankee.mp3")
     sounds.music.play()
     WaitForKeyPress(canvas)
-    sounds.music.fadeout(2000)
+    #sounds.music.fadeout(2000)
 
 def Broke(canvas):
     # clear the scene
@@ -392,6 +400,12 @@ def Broke(canvas):
     canvas.create_text(screen_width/2, row_spacing,  text="--------------------------------", fill="cyan", font=myfont, justify="center")
     canvas.create_text(screen_width/2, row_spacing*2, text="* GAME OVER *", fill="magenta", font=myfont, justify="center")
     canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="cyan", font=myfont, justify="center")
+    pos = row_spacing*5
+    for punter in sorted(punterlist, key=lambda punter: punter.totalwinnings, reverse=True):
+        bet_text = " bet" if punter.numberofturns==1 else " bets"
+        message = punter.name + " won a total of £" + str(punter.totalwinnings) + " in " + str(punter.numberofturns) + bet_text
+        canvas.create_text(screen_width/2, pos, text=message, fill="yellow", font=myfont, justify="center")
+        pos = pos + row_spacing*2
     sounds.music.load("yankee_slow.mp3")
     sounds.music.play()
     WaitForKeyPress(canvas)
