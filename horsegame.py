@@ -30,14 +30,14 @@ tk.config(cursor='none')
 tk.update()
 
 screen_width = tk.winfo_width()   # 1280
-#screen_height = tk.winfo_height()   # 720
-screen_height = int(screen_width * 9 / 16)   # Make the screen the right shape for widescreen TV
+screen_height = tk.winfo_height()   # 720
+#screen_height = int(screen_width * 9 / 16)   # Make the screen the right shape for widescreen TV
 print ("Screen: " + str(screen_width) + " by " + str(screen_height))
 
 NumberofPunters = 0
 keypressed = False
 numberofLines = 32
-numberofCols = 10  #40
+numberofCols = 30
 
 row_spacing = screen_height/numberofLines  #55  #75
 #start_pos = screen_width - 200  # 1000
@@ -111,7 +111,7 @@ def KeyPress(event):
 # Wait for any keypress
 def WaitForKeyPress(canvas):
     global keypressed
-    canvas.create_text(screen_width/2, screen_height-50, text="Press any key to continue...", fill="cyan", font=myfont, justify="center")
+    wait_text = canvas.create_text(screen_width/2, screen_height-50, text="Press any key to continue...", fill="cyan", font=myfont, justify="center")
     canvas.pack()
     keypressed = False
     while (keypressed == False):
@@ -121,6 +121,7 @@ def WaitForKeyPress(canvas):
         time.sleep(0.01)
     if (keyevent.keysym == 'Escape'):
         exit(0)
+    canvas.delete(wait_text)
     
 # Wait for integer number to be typed, textitem is where it will be echoed as you type
 def WaitForInteger(canvas, textitem):
@@ -193,14 +194,14 @@ def Initialize_characters_variables(canvas):
     horselist.append(horse)
 
 
-def DisplayCash(canvas, wait=False):
+def DisplayCash(canvas, title="LEADER BOARD", wait=False):
     Broke = 0   # Count how many punters are broke
     # clear the scene
     canvas.delete("all")
     # draw the scene
     canvas.create_rectangle(0, 0, screen_width, screen_height, fill="black")
     canvas.create_text(screen_width/2, row_spacing,  text="--------------------------------", fill="cyan", font=myfont, justify="center")
-    canvas.create_text(screen_width/2, row_spacing*2, text="* LEADER BOARD *", fill="magenta", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*2, text="* " + title + " *", fill="magenta", font=myfont, justify="center")
     canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="cyan", font=myfont, justify="center")
     pos = row_spacing*5
     for punter in sorted(punterlist, key=lambda punter: punter.total, reverse=True):
@@ -216,13 +217,11 @@ def DisplayCash(canvas, wait=False):
     return Broke
 
 def Punters(canvas):
-    DisplayCash(canvas)
-    #n = tkinter.simpledialog.askinteger("Welcome to the Races!", "How many punters?")
-    DisplayCash(canvas)
+    DisplayCash(canvas, title="HORSE RACING GAME")
     question = canvas.create_text(screen_width/2, screen_height-row_spacing*4, text="How many punters?", fill="red", font=myfont, justify="center")
     answer = canvas.create_text(screen_width/2, screen_height-row_spacing*2, text="", fill="orange", font=myfont, justify="center")
     n = 0
-    while (n<1 or n>10):   # minimum 1 and maximum 10 players
+    while (n<1 or n>8):   # minimum 1 and maximum 8 players
         n = WaitForInteger(canvas, answer)
         canvas.itemconfig(answer, text="")
     canvas.delete(question, answer)
@@ -235,15 +234,15 @@ def Punters(canvas):
         punter = Punter(name)
         punterlist.append(punter)
         canvas.delete(question, answer)
-        DisplayCash(canvas)
+        DisplayCash(canvas, title="HORSE RACING GAME")
 
 def StartingPrices(canvas):
     # clear the scene
     canvas.delete("all")
     # draw the scene
-    canvas.create_rectangle(0, 0, screen_width, screen_height, fill="green")
+    canvas.create_rectangle(0, 0, screen_width, screen_height, fill="dark green")
     canvas.create_text(screen_width/2, row_spacing,  text="--------------------------------", fill="red", font=myfont, justify="center")
-    canvas.create_text(screen_width/2, row_spacing*2, text="* STARTING PRICES *", fill="dark red", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*2, text="* STARTING PRICES *", fill="yellow", font=myfont, justify="center")
     canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="red", font=myfont, justify="center")
     pos = row_spacing*5
     i = 1
@@ -263,6 +262,8 @@ def StartingPrices(canvas):
     for punter in punterlist:
         if punter.total <= 0:
             sorry = canvas.create_text(screen_width/2, pos+row_spacing*4, text=punter.name + ", you are BROKE. NO BETS!!!!", fill="dark red", font=myfont, justify="center")
+            punter.pick = -1
+            punter.stake = 0
             tk.update()
             brokeSound.play()
             time.sleep(3)
@@ -302,12 +303,17 @@ def Race(canvas):
     canvas.create_oval(finish_pos-horse_step-8, 7*2*row_spacing+30, finish_pos-horse_step+8, 7*2*row_spacing+30+16, width=5, fill="", outline="gold")
     canvas.create_line(finish_pos-horse_step, 7*2*row_spacing+30+16, finish_pos-horse_step, 7*2*row_spacing+65, width=5, fill="gold")
 
-    canvas.create_rectangle(200, 8*2*row_spacing+65, screen_width-200, screen_height-100, fill="green")
-    pos = row_spacing*20
+    canvas.create_rectangle(0, 8*2*row_spacing, screen_width, screen_height, fill="dark green")
+    pos = row_spacing*17
+    canvas.create_text(screen_width/2, pos,                text="================================", fill="red", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, pos+row_spacing, text="LET'S RACE", fill="yellow", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, pos+row_spacing*2,  text="================================", fill="red", font=myfont, justify="center")
+    pos = pos + row_spacing * 3
     for punter in punterlist:
-        canvas.create_text(screen_width/2, pos, text=punter.name +" bet £"+ str(punter.stake) +" on "+ horselist[punter.pick].name +" at "+ str(horselist[punter.pick].price) +"/1",
+        if punter.pick > -1:
+            canvas.create_text(screen_width/2, pos, text=punter.name +" bet £"+ str(punter.stake) +" on "+ horselist[punter.pick].name +" at "+ str(horselist[punter.pick].price) +"/1",
                            fill=horselist[punter.pick].colour, font=myfont, justify="center")
-        pos = pos + row_spacing * 1.5
+            pos = pos + row_spacing * 1.2
 
     for h in horselist:
         h.prepare_to_race()
@@ -344,8 +350,9 @@ def Race(canvas):
 
     # announce the winner
     winner_text = horse.name + " is the winner!"
-    #canvas.create_text(250, (h+1)*row_spacing, text=winner_text)
-    canvas.create_text(screen_width/2, screen_height-200, text=winner_text, fill="dark blue", font=myfont, justify="center")
+    #canvas.create_text(screen_width/2, (h+1)*row_spacing, text=winner_text)
+    #canvas.create_text(screen_width/2, screen_height-200, text=winner_text, fill="dark blue", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, 4*row_spacing, text=winner_text, fill="dark blue", font=myfont, justify="center")
     WaitForKeyPress(canvas)
 
     # return the number of the winning horse so we can calculate punter winnings next
@@ -355,9 +362,9 @@ def Results(canvas, winning_horse_index):
     # clear the scene
     canvas.delete("all")
     # draw the scene
-    canvas.create_rectangle(0, 0, screen_width, screen_height, fill="green")
+    canvas.create_rectangle(0, 0, screen_width, screen_height, fill="dark green")
     canvas.create_text(screen_width/2, row_spacing,  text="--------------------------------", fill="red", font=myfont, justify="center")
-    canvas.create_text(screen_width/2, row_spacing*2, text="* RESULTS *", fill="dark red", font=myfont, justify="center")
+    canvas.create_text(screen_width/2, row_spacing*2, text="* RESULTS *", fill="yellow", font=myfont, justify="center")
     canvas.create_text(screen_width/2, row_spacing*3,  text="--------------------------------", fill="red", font=myfont, justify="center")
     pos = row_spacing*5
     i = 1
