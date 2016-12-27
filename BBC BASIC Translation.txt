@@ -1,4 +1,4 @@
-THIS IS THE LIKELY CODE FOR THE BBC B                            THIS IS WHAT WAS PULLED FROM THE BBC B TAPE
+THIS IS THE LIKEL Y CODE FOR THE BBC B                            THIS IS WHAT WAS PULLED FROM THE BBC B TAPE
 10 REM HORSE-RACE                                                  Ù HORSE-RACE
 20 MODE 2                                                        	Î2   
 30 PROCInitialize_characters_variables                           (ÚInitialize_characters_variables    
