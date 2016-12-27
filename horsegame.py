@@ -6,6 +6,9 @@
 
 # Press Esc once or maybe more to exit the game early
 
+# TODO
+
+
 from tkinter import *
 from pygame import mixer as sounds
 import random
@@ -287,6 +290,7 @@ def StartingPrices(canvas):
                     time.sleep(1)
                     canvas.delete(sorry)
                 canvas.delete(answer2)
+            canvas.delete(question1, question2)
             punter.total = punter.total - punter.stake
             print (punter.name + " placed £" + str(punter.stake) + " on " + horselist[punter.pick].name + " and now has £" + str(punter.total))
         
@@ -355,7 +359,7 @@ def Race(canvas):
 
     # announce the winner
     winner_text = horse.name + " is the winner!"
-    canvas.create_text(screen_width/2, (h+1)*row_spacing, text=winner_text, fill=horse.colour, font=myfont, justify="center")
+    canvas.create_text(screen_width/2, (h+1)*row_spacing*2, text=winner_text, fill=horse.colour, font=myfont, justify="center")
     WaitForKeyPress(canvas)
 
     # return the number of the winning horse so we can calculate punter winnings next
@@ -406,6 +410,7 @@ def Broke(canvas):
         message = punter.name + " won a total of £" + str(punter.totalwinnings) + " in " + str(punter.numberofturns) + bet_text
         canvas.create_text(screen_width/2, pos, text=message, fill="yellow", font=myfont, justify="center")
         pos = pos + row_spacing*2
+    canvas.create_text(screen_width/2, screen_height-100,  text="Press any key to play again or Esc to exit.", fill="white", font=myfont, justify="center")
     sounds.music.load("yankee_slow.mp3")
     sounds.music.play()
     WaitForKeyPress(canvas)
@@ -421,19 +426,20 @@ canvas = Canvas(tk, width=screen_width, height=screen_height, highlightthickness
 
 # setup horses and punters
 Initialize_characters_variables(canvas)
-Punters(canvas)
 
-# main game loop
 while True:
-    numberbroke = DisplayCash(canvas, wait=True)
-    print(str(numberbroke)+" punters are broke out of "+str(len(punterlist)))
-    if numberbroke == len(punterlist):    # if everyone broke, end the game by breaking out of the game loop
-        break
-    StartingPrices(canvas)
-    winning_horse = Race(canvas)
-    print("Horse index ", winning_horse, " ", horselist[winning_horse].name, " is the winner.")
-    Results(canvas, winning_horse)
+    Punters(canvas)
 
-# end the game
-Broke(canvas)
+    # main game loop
+    while True:
+        numberbroke = DisplayCash(canvas, wait=True)
+        print(str(numberbroke)+" punters are broke out of "+str(len(punterlist)))
+        if numberbroke == len(punterlist):    # if everyone broke, end the game by breaking out of the game loop
+            break
+        StartingPrices(canvas)
+        winning_horse = Race(canvas)
+        print("Horse index ", winning_horse, " ", horselist[winning_horse].name, " is the winner.")
+        Results(canvas, winning_horse)
 
+    Broke(canvas)
+    punterlist = []
